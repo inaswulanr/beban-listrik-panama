@@ -13,6 +13,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
+import base64
 
 # ==========================================
 # 1. KONFIGURASI HALAMAN & CUSTOM LIGHT CSS
@@ -24,55 +25,242 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+
 st.markdown("""
 <style>
-    /* Paksa nuansa Light Mode yang bersih & modern */
+    /* ==========================================
+       1. GLOBAL THEME
+    ========================================== */
+
     .stApp {
-        background-color: #FFFFFF;
-        color: #0F172A;
+        background-color: #FFFCFE;
+        color: #1F2937;
     }
+
+    [data-testid="stHeader"] {
+        background-color: transparent;
+    }
+
+    /* ==========================================
+       2. SIDEBAR
+    ========================================== */
+
     [data-testid="stSidebar"] {
-        background-color: #F8FAFC;
-        border-right: 1px solid #E2E8F0;
+        background-color: #FFF7FA;
+        border-right: 1px solid #F3DCE8;
     }
-    /* Gaya Kartu KPI */
+
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #831843;
+    }
+
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] label {
+        color: #4B5563;
+    }
+
+    /* ==========================================
+       3. KPI METRIC CARDS
+    ========================================== */
+
     div[data-testid="stMetric"] {
-        background-color: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 10px;
-        padding: 14px 18px;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        background-color: #FFFFFF;
+        border: 1px solid #F3DCE8;
+        border-radius: 14px;
+        padding: 18px 20px;
+        box-shadow: 0 2px 8px rgba(190, 24, 93, 0.04);
+        transition: all 0.2s ease;
     }
-    /* Gaya Tab */
+
+    div[data-testid="stMetric"]:hover {
+        border-color: #F9A8D4;
+        box-shadow: 0 4px 14px rgba(219, 39, 119, 0.09);
+        transform: translateY(-2px);
+    }
+
+    div[data-testid="stMetricLabel"] {
+        color: #6B7280;
+        font-weight: 500;
+    }
+
+    div[data-testid="stMetricValue"] {
+        color: #831843;
+        font-weight: 700;
+    }
+
+    /* ==========================================
+       4. TABS NAVIGATION
+    ========================================== */
+
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
-        border-bottom: 1px solid #E2E8F0;
+        border-bottom: 1px solid #F3DCE8;
     }
+
     .stTabs [data-baseweb="tab"] {
-        background-color: #F8FAFC;
-        border-radius: 8px 8px 0 0;
+        background-color: #FFF7FA;
+        border-radius: 9px 9px 0 0;
         padding: 10px 18px;
         font-weight: 600;
-        color: #475569;
+        color: #6B7280;
+        transition: all 0.2s ease;
     }
+
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #FCE7F3;
+        color: #BE185D;
+    }
+
     .stTabs [aria-selected="true"] {
-        background-color: #EFF6FF !important;
-        color: #1D4ED8 !important;
-        border-bottom: 2px solid #2563EB !important;
+        background-color: #FCE7F3 !important;
+        color: #BE185D !important;
+        border-bottom: 2px solid #DB2777 !important;
     }
+
+    /* ==========================================
+       5. BUTTONS
+    ========================================== */
+
+    .stButton > button,
+    .stDownloadButton > button {
+        background-color: #DB2777;
+        color: #FFFFFF;
+        border: 1px solid #DB2777;
+        border-radius: 9px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .stButton > button:hover,
+    .stDownloadButton > button:hover {
+        background-color: #BE185D;
+        border-color: #BE185D;
+        color: #FFFFFF;
+    }
+
+    /* ==========================================
+       6. INPUT FIELDS
+    ========================================== */
+
+    .stTextInput input,
+    .stNumberInput input,
+    .stSelectbox div[data-baseweb="select"],
+    .stMultiSelect div[data-baseweb="select"] {
+        border-radius: 8px;
+    }
+
+    /* ==========================================
+       7. DATAFRAME & TABLE
+    ========================================== */
+
+    [data-testid="stDataFrame"] {
+        border: 1px solid #F3DCE8;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    /* ==========================================
+       8. DIVIDERS
+    ========================================== */
+
+    hr {
+        border-color: #F3DCE8;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. HEADER & BANNER
+# 2. HEADER & HERO BANNER
 # ==========================================
-banner_path = os.path.join("assets", "banner.png")
+
+banner_path = os.path.join("assets", "chronos_freesia.jpg")
+
 if os.path.exists(banner_path):
-    st.image(banner_path, use_container_width=True)
+    with open(banner_path, "rb") as image_file:
+        encoded_image = base64.b64encode(
+            image_file.read()
+        ).decode()
+
+    st.markdown(f"""
+    <style>
+        .chronos-hero {{
+            background-image:
+                linear-gradient(
+                    90deg,
+                    rgba(15, 23, 42, 0.88) 0%,
+                    rgba(15, 23, 42, 0.58) 55%,
+                    rgba(15, 23, 42, 0.12) 100%
+                ),
+                url("data:image/jpeg;base64,{encoded_image}");
+
+            background-size: cover;
+            background-position: center 45%;
+            background-repeat: no-repeat;
+
+            min-height: 260px;
+            border-radius: 18px;
+            padding: 38px 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+        }}
+
+        .chronos-hero h1 {{
+            color: white !important;
+            font-size: 38px !important;
+            font-weight: 750 !important;
+            margin: 0 0 10px 0 !important;
+            letter-spacing: -1px;
+        }}
+
+        .chronos-hero p {{
+            color: #FCE7F3 !important;
+            font-size: 15px;
+            margin: 0;
+            max-width: 650px;
+            line-height: 1.6;
+        }}
+
+        .chronos-tag {{
+            display: inline-block;
+            background: rgba(249, 168, 212, 0.20);
+            color: #FBCFE8;
+            border: 1px solid rgba(251, 207, 232, 0.35);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            width: fit-content;
+        }}
+    </style>
+
+    <div class="chronos-hero">
+        <div class="chronos-tag">
+            TIME SERIES MODEL INTELLIGENCE CENTER
+        </div>
+        <h1>ChronosLab</h1>
+        <p>
+            Explore, benchmark, and evaluate time series forecasting
+            models powered by Amazon Chronos-Bolt and classical
+            statistical methods.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
 else:
     st.title("⚡ ChronosLab — Model Intelligence Center")
+    st.warning("Hero image tidak ditemukan. Periksa folder assets.")
 
-st.caption("Platform Evaluasi Transfer Learning Deret Waktu (Amazon Chronos-Bolt Zero-Shot & Fine-Tuned vs Metode Klasik)")
+st.caption(
+    "An Interactive Platform for Time Series Forecasting "
+    "and Model Evaluation"
+)
 
 # ==========================================
 # 3. SIDEBAR: UPLOAD DATASET & KONTROL
